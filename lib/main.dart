@@ -120,3 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+/* refresh dependencies safely
+
+flutter pub get
+cd ios && pod install && cd ..
+
+*/
