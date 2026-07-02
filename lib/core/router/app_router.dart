@@ -1,3 +1,4 @@
+import 'package:course_marketplace/features/preview/style_preview_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,7 +11,9 @@ part 'app_router.g.dart';
 @riverpod
 GoRouter appRouter(Ref ref) {
   return GoRouter(
-    initialLocation: '/login',
+    // initialLocation: '/login',
+    initialLocation: '/preview', // Temporary route — delete this after Day 4
+
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
@@ -22,6 +25,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/instructor-home',
         builder: (context, state) => const InstructorHomeScreen(),
+      ),
+      GoRoute(
+        path: '/preview', // Temporary route — delete this after Day 4
+        builder: (context, state) => const StylePreviewScreen(),
       ),
     ],
   );
