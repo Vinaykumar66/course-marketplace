@@ -56,4 +56,12 @@ git commit -m "Day 3: ...."
 Step 4
 git push
 
+
+Fix — Restart the Dart Analysis Server
+In VS Code:
+
+Press Cmd + Shift + P
+Type "Dart: Restart Analysis Server"
+Press Enter
+
 */

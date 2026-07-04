@@ -53,7 +53,7 @@ final class AuthRepositoriesProvider
   }
 }
 
-String _$authRepositoriesHash() => r'807eb5b3222d196ddaa4addd752ab6feea910d86';
+String _$authRepositoriesHash() => r'1ad25c8267b9ba3025b9c46a06af2b2fe6f58510';
 
 @ProviderFor(courseRepositories)
 final courseRepositoriesProvider = CourseRepositoriesProvider._();
@@ -101,4 +101,4 @@ final class CourseRepositoriesProvider
 }
 
 String _$courseRepositoriesHash() =>
-    r'e46c0bf6c65a420bde13ceeb8f807f9e7914b72a';
+    r'03e7872e093b3c998088fc1bae0f81c9e9cf9db9';
