@@ -5,18 +5,22 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/student/student_home_screen.dart';
 import '../../features/instructor/instructor_home_screen.dart';
+import '../../features/auth/presentation/signup_screen.dart';
 
 part 'app_router.g.dart';
 
 @riverpod
 GoRouter appRouter(Ref ref) {
   return GoRouter(
-    // initialLocation: '/login',
-    initialLocation: '/preview', // Temporary route — delete this after Day 4
+    initialLocation: '/login',
 
+    // initialLocation: '/preview', // Temporary route — delete this after Day 4
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
       GoRoute(
         path: '/student-home',
         builder: (context, state) => const StudentHomeScreen(),
