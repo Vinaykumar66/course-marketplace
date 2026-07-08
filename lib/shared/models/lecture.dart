@@ -4,7 +4,7 @@ part 'lecture.freezed.dart';
 part 'lecture.g.dart';
 
 @freezed
-class Lecture with _$Lecture {
+abstract class Lecture with _$Lecture {
   const factory Lecture({
     required String id,
     required String sectionId,

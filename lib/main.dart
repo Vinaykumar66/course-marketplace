@@ -64,4 +64,7 @@ Press Cmd + Shift + P
 Type "Dart: Restart Analysis Server"
 Press Enter
 
+to analyze error in code 
+dart analyze lib/features/auth/ 2>&1
+
 */

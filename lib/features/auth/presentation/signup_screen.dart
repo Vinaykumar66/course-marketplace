@@ -1,28 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/models/user_roles.dart';
+import '../application/auth_providers.dart';
+import '../data/firebase_auth_service.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   UserRole _selectedRole = UserRole.student;
-  bool _isLoading = false;
 
-  //dispose the controllers when the widget is disposed to free up resources
   @override
   void dispose() {
     _nameController.dispose();
@@ -32,49 +36,93 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  //validators: validate the form and handle the signup logic
-
+  // ── Validators ─────────────────────────────────────────────────────────────
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Please enter your name';
     }
-    if (value.trim().length < 2)
+    if (value.trim().length < 2) {
       return 'Name must be at least 2 characters long';
+    }
     return null;
   }
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) return 'Email is required';
-
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
-    if (!emailRegex.hasMatch(value.trim()))
+    if (!emailRegex.hasMatch(value.trim())) {
       return 'Please enter a valid email address';
+    }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) return 'Password is required';
-    if (value.length < 8) return 'Password must be at least 8 characters long';
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
+    if (value == null || value.isEmpty) return 'Please confirm your password';
     if (value != _passwordController.text) return 'Passwords do not match';
     return null;
   }
 
-  void _onSubmit() {
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
-    print('Name: ${_nameController.text.trim()}');
-    print('Email: ${_emailController.text.trim()}');
-    print('Role: ${_selectedRole}');
+
+    // ref.watch in build() keeps signUpProvider alive during the async call.
+    // We only CALL the method here — navigation and errors are in ref.listen.
+    await ref
+        .read(signUpProvider.notifier)
+        .signUp(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          role: _selectedRole,
+        );
   }
 
+  // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    // ── KEY FIX: ref.watch keeps the provider alive during the Firebase call ──
+    final signUpState = ref.watch(signUpProvider);
+    final isLoading = signUpState is AsyncLoading;
+
+    // ── React to state changes (navigate on success, SnackBar on error) ───────
+    ref.listen<AsyncValue<void>>(signUpProvider, (previous, next) {
+      // Only react when the loading state finishes
+      if (previous is! AsyncLoading) return;
+
+      next.whenOrNull(
+        data: (_) {
+          // Navigate to the correct home based on the selected role
+          final route = _selectedRole == UserRole.instructor
+              ? '/instructor-home'
+              : '/student-home';
+          context.go(route);
+        },
+        error: (err, _) {
+          final message = err is FirebaseAuthException
+              ? FirebaseAuthService.parseError(err)
+              : err.toString();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
@@ -92,7 +140,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: AppTextStyles.bodyMedium,
                 ),
 
-                //name field
+                // ── Name ─────────────────────────────────────────────────────
                 const SizedBox(height: 32),
                 Text('Your Name', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 8),
@@ -106,7 +154,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
 
-                // email field
+                // ── Email ─────────────────────────────────────────────────────
                 const SizedBox(height: 16),
                 Text('Email', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 8),
@@ -120,7 +168,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                 ),
-                //password field
+
+                // ── Password ──────────────────────────────────────────────────
                 const SizedBox(height: 16),
                 Text('Password', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 8),
@@ -129,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: _validatePassword,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter your password with atleast 8 characters',
+                    hintText: 'Enter your password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -137,16 +186,14 @@ class _SignupScreenState extends State<SignupScreen> {
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                 ),
+
+                // ── Confirm Password ──────────────────────────────────────────
                 const SizedBox(height: 20),
-                //confirm password field
                 Text('Confirm Password', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -162,17 +209,16 @@ class _SignupScreenState extends State<SignupScreen> {
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 28),
 
-                //role selection
+                // ── Role selection ────────────────────────────────────────────
+                const SizedBox(height: 28),
                 Text('I want to...', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 12),
                 Row(
@@ -184,9 +230,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         icon: Icons.school_outlined,
                         role: UserRole.student,
                         isSelected: _selectedRole == UserRole.student,
-                        onTap: () => setState(() {
-                          _selectedRole = UserRole.student;
-                        }),
+                        onTap: () =>
+                            setState(() => _selectedRole = UserRole.student),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -197,18 +242,18 @@ class _SignupScreenState extends State<SignupScreen> {
                         icon: Icons.cast_for_education_outlined,
                         role: UserRole.instructor,
                         isSelected: _selectedRole == UserRole.instructor,
-                        onTap: () => setState(() {
-                          _selectedRole = UserRole.instructor;
-                        }),
+                        onTap: () =>
+                            setState(() => _selectedRole = UserRole.instructor),
                       ),
                     ),
                   ],
                 ),
+
+                // ── Submit button ─────────────────────────────────────────────
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _onSubmit,
-
-                  child: _isLoading
+                  onPressed: isLoading ? null : _onSubmit,
+                  child: isLoading
                       ? const SizedBox(
                           width: 24,
                           height: 24,
@@ -220,11 +265,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       : const Text('Create Account'),
                 ),
                 const SizedBox(height: 16),
+
+                // ── Login link ────────────────────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have and account?',
+                      'Already have an account?',
                       style: AppTextStyles.bodySmall,
                     ),
                     TextButton(
@@ -242,6 +289,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 }
 
+// ── Role card widget (unchanged from your original) ───────────────────────────
 class _RoleCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -268,7 +316,7 @@ class _RoleCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.08)
+              ? AppColors.primary.withValues(alpha: 0.08)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
