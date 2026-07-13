@@ -12,6 +12,7 @@ import '../../../features/auth/application/auth_providers.dart';
 import '../../../features/profile/data/user_repository.dart';
 import '../../shared/models/user_roles.dart';
 import 'go_router_refresh_stream.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -30,7 +31,7 @@ GoRouter appRouter(Ref ref) {
           state.matchedLocation == '/signup';
 
       if (!isLoggedIn && !isAuthRoute) {
-        final appUser = await UserRepository().geUser(user.uid);
+        final appUser = await UserRepository().getUser(user!.uid);
         if (appUser == null) return '/login';
         return appUser.role == UserRole.instructor
             ? '/instructor-home'
@@ -62,6 +63,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/preview', // Temporary route — delete this after Day 4
         builder: (context, state) => const StylePreviewScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
     ],
   );

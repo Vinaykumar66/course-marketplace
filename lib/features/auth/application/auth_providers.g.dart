@@ -9,6 +9,74 @@ part of 'auth_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(firebaseAuthState)
+final firebaseAuthStateProvider = FirebaseAuthStateProvider._();
+
+final class FirebaseAuthStateProvider
+    extends
+        $FunctionalProvider<AsyncValue<fb.User?>, fb.User?, Stream<fb.User?>>
+    with $FutureModifier<fb.User?>, $StreamProvider<fb.User?> {
+  FirebaseAuthStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'firebaseAuthStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$firebaseAuthStateHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<fb.User?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<fb.User?> create(Ref ref) {
+    return firebaseAuthState(ref);
+  }
+}
+
+String _$firebaseAuthStateHash() => r'73e8e4b686379e431742c570378fe399c740f0b2';
+
+@ProviderFor(currentAppUser)
+final currentAppUserProvider = CurrentAppUserProvider._();
+
+final class CurrentAppUserProvider
+    extends
+        $FunctionalProvider<AsyncValue<AppUser?>, AppUser?, FutureOr<AppUser?>>
+    with $FutureModifier<AppUser?>, $FutureProvider<AppUser?> {
+  CurrentAppUserProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentAppUserProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentAppUserHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<AppUser?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<AppUser?> create(Ref ref) {
+    return currentAppUser(ref);
+  }
+}
+
+String _$currentAppUserHash() => r'c06ca94bb9ec2c7a21cfcf4f28711d53ee6a0c15';
+
 @ProviderFor(firebaseAuthService)
 final firebaseAuthServiceProvider = FirebaseAuthServiceProvider._();
 

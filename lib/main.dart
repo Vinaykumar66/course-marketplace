@@ -6,12 +6,38 @@ import 'firebase_options.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
+import 'features/courses/data/course_repository.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // ServiceLocator().setupFirebase(); // Initialize the service locator
   //ServiceLocator().setupSupabase(); // Initialize the service locator
   //ServiceLocator().setupMongoDB(); // Initialize the service locator
+
+  //temp
+  // Temporary test — delete after verifying
+  final repo = CourseRepository();
+
+  // Test 1: stream of published courses
+  repo.getPublishedCourses().listen((courses) {
+    print(
+      'Published courses: ${courses.length}',
+    ); // Should print the count of your sample documents
+    for (final c in courses) {
+      print(
+        '  - ${c.title}',
+      ); // Lists each title
+    }
+  });
+
+  // Test 2: single course by ID — replace with an actual document ID from your console
+  final course = await repo.getCourseById('PASTE_A_REAL_COURSE_ID_HERE');
+  print(
+    'By ID: ${course?.title}',
+  ); // Should print the course title, or null if ID not found
+
+  //temp
 
   runApp(const ProviderScope(child: MyApp()));
 }

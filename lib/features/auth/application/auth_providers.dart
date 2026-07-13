@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../shared/models/app_user.dart';
 import '../../../shared/models/user_roles.dart';
@@ -8,6 +8,19 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../../features/profile/data/user_repository.dart';
 
 part 'auth_providers.g.dart';
+
+@riverpod
+Stream<fb.User?> firebaseAuthState(Ref ref) {
+  return fb.FirebaseAuth.instance.authStateChanges();
+}
+
+@riverpod
+Future<AppUser?> currentAppUser(Ref ref) async {
+  final firebaseUser = await ref.watch(firebaseAuthStateProvider.future);
+
+  if (firebaseUser == null) return null;
+  return UserRepository().getUser(firebaseUser.uid);
+}
 
 @riverpod
 FirebaseAuthService firebaseAuthService(Ref ref) {
