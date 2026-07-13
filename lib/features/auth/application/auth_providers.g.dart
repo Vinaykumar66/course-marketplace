@@ -75,7 +75,7 @@ final class CurrentAppUserProvider
   }
 }
 
-String _$currentAppUserHash() => r'c06ca94bb9ec2c7a21cfcf4f28711d53ee6a0c15';
+String _$currentAppUserHash() => r'c8d606c5cfc9361b1bc18dff81f6b724207763e0';
 
 @ProviderFor(firebaseAuthService)
 final firebaseAuthServiceProvider = FirebaseAuthServiceProvider._();

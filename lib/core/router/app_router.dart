@@ -13,6 +13,7 @@ import '../../../features/profile/data/user_repository.dart';
 import '../../shared/models/user_roles.dart';
 import 'go_router_refresh_stream.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/courses/presentation/course_list_test_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -21,7 +22,7 @@ GoRouter appRouter(Ref ref) {
   final authState = ref.watch(firebaseAuthStateProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/courses-test', //'/login',
 
     redirect: (context, state) async {
       final user = fb.FirebaseAuth.instance.currentUser;
@@ -67,6 +68,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/courses-test',
+        builder: (context, state) => const CourseListTestScreen(),
       ),
     ],
   );
